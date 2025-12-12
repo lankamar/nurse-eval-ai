@@ -1,0 +1,17 @@
+fastapi==0.111.0
+uvicorn[standard]==0.30.1
+SQLAlchemy==2.0.31
+psycopg2-binary==2.9.9
+alembic==1.13.2
+python-dotenv==1.0.1
+pydantic[email]==2.8.2
+pydantic-settings==2.4.0
+passlib[bcrypt]==1.7.4
+bcrypt==3.2.2
+PyJWT==2.9.0
+pyotp==2.9.0
+redis==5.0.7
+fpdf2==2.7.9
+qrcode==7.4.2
+pillow==10.4.0
+pytest==8.3.3
