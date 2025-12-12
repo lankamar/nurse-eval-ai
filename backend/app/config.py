@@ -1,4 +1,6 @@
 from functools import lru_cache
+
+from pydantic import field_validator
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -30,6 +32,14 @@ class Settings(BaseSettings):
     gcp_bucket: str | None = Field(None, alias="GCP_BUCKET")
 
     redis_url: str = Field("redis://localhost:6379/0", alias="REDIS_URL")
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def _normalize_database_url(cls, value: str):
+        if isinstance(value, str) and value.startswith("postgres://"):
+            # Render (y otros) a veces entregan postgres://; SQLAlchemy espera postgresql://
+            return "postgresql://" + value[len("postgres://") :]
+        return value
 
 
 @lru_cache
