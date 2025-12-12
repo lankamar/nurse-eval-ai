@@ -25,9 +25,11 @@ class PDFService:
         if not evaluation:
             return None
         
-        # Generate filename
+        # Generate filename with sanitized evaluation_id
+        # Use only the integer ID to prevent path traversal
+        safe_eval_id = str(int(evaluation_id))  # Ensures only numeric value
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-        filename = f"evaluation_{evaluation_id}_{timestamp}.pdf"
+        filename = f"evaluation_{safe_eval_id}_{timestamp}.pdf"
         filepath = os.path.join(self.output_dir, filename)
         
         # Create PDF

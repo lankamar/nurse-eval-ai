@@ -36,9 +36,20 @@ const Register = () => {
       return;
     }
 
-    // Validate password length
+    // Strong password validation
     if (formData.password.length < 8) {
       setError('La contraseña debe tener al menos 8 caracteres');
+      setLoading(false);
+      return;
+    }
+
+    // Check for at least one uppercase, one lowercase, and one digit
+    const hasUpperCase = /[A-Z]/.test(formData.password);
+    const hasLowerCase = /[a-z]/.test(formData.password);
+    const hasNumber = /\d/.test(formData.password);
+    
+    if (!hasUpperCase || !hasLowerCase || !hasNumber) {
+      setError('La contraseña debe contener al menos una mayúscula, una minúscula y un número');
       setLoading(false);
       return;
     }

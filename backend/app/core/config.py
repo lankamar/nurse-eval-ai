@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql://nurseeval:nurseeval_secure_pass@db:5432/nurse_eval_db"
     
     # Security
-    SECRET_KEY: str = "your-super-secret-key-change-in-production-min-32-chars"
+    SECRET_KEY: str  # Required - no default, must be set via environment
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7

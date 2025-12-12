@@ -207,6 +207,8 @@ def seed_criteria(db: Session):
 
 def seed_admin_user(db: Session):
     """Create default admin user."""
+    import secrets
+    import string
     
     # Check if admin exists
     existing_admin = db.query(User).filter(User.username == "admin").first()
@@ -214,17 +216,22 @@ def seed_admin_user(db: Session):
         print("Admin user already exists")
         return
     
+    # Generate secure random password
+    alphabet = string.ascii_letters + string.digits + string.punctuation
+    admin_password = ''.join(secrets.choice(alphabet) for i in range(16))
+    
     admin_user = User(
         username="admin",
         email="admin@hospital.clinicas.uba.ar",
         full_name="Administrador del Sistema",
-        hashed_password=get_password_hash("admin123"),
+        hashed_password=get_password_hash(admin_password),
         role=RoleEnum.ADMIN,
         is_active=True
     )
     db.add(admin_user)
     db.commit()
-    print("Created admin user (username: admin, password: admin123)")
+    print(f"Created admin user (username: admin, password: {admin_password})")
+    print("IMPORTANT: Save this password securely and change it after first login!")
 
 
 def init_db():
