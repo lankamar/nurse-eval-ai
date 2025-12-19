@@ -35,7 +35,7 @@ services:
   - name: nurse-eval-frontend
     type: web
     env: static
-    plan: free
+    
     branch: SIMULADOR
     buildCommand: "cd frontend && npm install && npm run build"
     staticPublishPath: frontend/dist
