@@ -1,4 +1,5 @@
 services:
+  # Backend API (FastAPI)
   - name: nurse-eval-api
     type: web
     env: python
@@ -25,8 +26,21 @@ services:
       - key: DEMO_TOTP_SECRET
         value: "JBSWY3DPEHPK3PXP"
       - key: DEMO_BACKUP_CODES
-        value: "[\"BACKUP-0001\",\"BACKUP-0002\",\"BACKUP-0003\",\"BACKUP-0004\",\"BACKUP-0005\"]"
+        value: '["BACKUP-0001","BACKUP-0002","BACKUP-0003","BACKUP-0004","BACKUP-0005"]'
     healthCheckPath: /health
+
+  # Frontend (React + Vite)
+  - name: nurse-eval-frontend
+    type: web
+    env: static
+    plan: free
+    branch: SIMULADOR
+    buildCommand: "cd frontend && npm install && npm run build"
+    staticPublishPath: frontend/dist
+    autoDeploy: true
+    envVars:
+      - key: VITE_API_URL
+        value: "https://nurse-eval-api.onrender.com"
 
 databases:
   - name: nurse-eval-db
