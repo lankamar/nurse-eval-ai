@@ -5,6 +5,7 @@ services:
     env: python
     plan: free
     branch: SIMULADOR
+    pythonVersion: "3.11"
     buildCommand: "cd backend && pip install -r requirements.txt"
     startCommand: "cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
     autoDeploy: true
@@ -35,7 +36,6 @@ services:
   - name: nurse-eval-frontend
     type: web
     env: static
-    plan: free
     branch: SIMULADOR
     buildCommand: "cd frontend && npm install && npm run build"
     staticPublishPath: frontend/dist
