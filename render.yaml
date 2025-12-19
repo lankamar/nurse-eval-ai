@@ -10,7 +10,9 @@ services:
     autoDeploy: true
     envVars:
       - key: DATABASE_URL
-        fromDatabase: nurse-eval-db
+        fromDatabase:
+          name: nurse-eval-db
+          property: connectionString
       - key: JWT_SECRET
         sync: false
       - key: JWT_EXPIRE_MINUTES
