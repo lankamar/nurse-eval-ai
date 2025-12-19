@@ -10,8 +10,93 @@ from app.config import get_settings
 from app.db import get_db
 from app.models import User
 from app.schemas.auth import LoginRequest, RefreshRequest, Token
-from app.schemas.user import UserOut
+from app.schemas.user import UserOut, UserCreate
+import secrets
+import string
+def _generate_backup_codes(n=10):
+    codes = []
+    for _ in range(n):
+        code = ''.join(secrets.choice(string.ascii_uppercase + string.digits) for _ in range(8))
+        codes.append(code)
+    return codes
+
+def _hash_backup_codes(codes):
+    return [hash_value(code) for code in codes]
+
+@router.post("/register")
+async def register(payload: UserCreate, db: Session = Depends(get_db)):
+    email = payload.email.lower()
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    if len(payload.password) < 8:
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 8 caracteres")
+    # Generar TOTP y backup codes
+    totp_secret = pyotp.random_base32()
+    backup_codes = _generate_backup_codes()
+    hashed_codes = _hash_backup_codes(backup_codes)
+    user = User(
+        email=email,
+        hashed_password=hash_value(payload.password),
+        role=payload.role if hasattr(payload, 'role') else 'nurse',
+        totp_secret=totp_secret,
+        backup_codes=hashed_codes,
+        is_active=False,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    provisioning_uri = pyotp.totp.TOTP(totp_secret, interval=settings.totp_interval, issuer=settings.totp_issuer).provisioning_uri(
+        name=user.email, issuer_name=settings.totp_issuer
+    )
+    return {
+        "id": user.id,
+        "email": user.email,
+        "is_active": user.is_active,
+        "provisioning_uri": provisioning_uri,
+        "backup_codes": backup_codes,
+        "detail": "Usuario creado. Verifique su email y configure 2FA."
+    }
+
 from app.services.encryption import hash_value, verify_value
+
+router = APIRouter()
+settings = get_settings()
+ALGORITHM = "HS256"
+
+# Endpoint de registro de usuario
+@router.post("/register")
+async def register(payload: UserCreate, db: Session = Depends(get_db)):
+    email = payload.email.lower()
+    if db.query(User).filter(User.email == email).first():
+        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    if len(payload.password) < 8:
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 8 caracteres")
+    # Generar TOTP y backup codes
+    totp_secret = pyotp.random_base32()
+    backup_codes = _generate_backup_codes()
+    hashed_codes = _hash_backup_codes(backup_codes)
+    user = User(
+        email=email,
+        hashed_password=hash_value(payload.password),
+        role=getattr(payload, 'role', 'nurse'),
+        totp_secret=totp_secret,
+        backup_codes=hashed_codes,
+        is_active=False,
+    )
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    provisioning_uri = pyotp.totp.TOTP(totp_secret, interval=settings.totp_interval, issuer=settings.totp_issuer).provisioning_uri(
+        name=user.email, issuer_name=settings.totp_issuer
+    )
+    return {
+        "id": user.id,
+        "email": user.email,
+        "is_active": user.is_active,
+        "provisioning_uri": provisioning_uri,
+        "backup_codes": backup_codes,
+        "detail": "Usuario creado. Verifique su email y configure 2FA."
+    }
 
 router = APIRouter()
 settings = get_settings()
